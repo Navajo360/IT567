@@ -11,18 +11,22 @@ targetPort = ''
 maxPortNum = 9999
 minPortNum = 1
 
-
 #Command-line switches to specify a host and port
 parser = OptionParser()
 parser.add_option("-t", "--target", help="target host address")
-parser.add_option("-p", "--port", help="target port")
+parser.add_option("-p", "--port", help="target port", type="int")
 (options, args) = parser.parse_args()
+if not options.target:
+	parser.error("Target host not given")
+if not options.port:
+	parser.error("Target port(s) not given")
+
 #Scan function
-def myscanner(targetHost, targetPort, r_code = 1):
+def myscanner(host, port, r_code = 1):
 	try:
 		s = socket(AF_INET, SOCK_STREAM)
 		
-		code = s.connect_ex((targetHost, targetPort))
+		code = s.connect_ex((host, port))
 		
 		if code == 0:
 			r_code = code
@@ -41,8 +45,12 @@ targetPort = options.port
 print("Host: %s Port: %s" % (targetHost, targetPort))
 print("Port scan started\n")
 
-up = myscanner(targetHost, targetPort)
-if up == 0:
-	print("Port %s: Open" % (targetPort))
+for port in range(targetPort, targetPort):
+	try:
+		up = myscanner(targetHost, targetPort)
+		if up == 0:
+			print("Port %s: Open" % (targetPort))
+	except Exception, e:
+		pass
 
 print("Scan completed")
